@@ -6,7 +6,7 @@ const initialState = {
   "0d61e6-366c-763c-dd6e-6bd078b7f8": {
     first_name: "Hem Raj",
     last_name: "Rana",
-    name: "Hem Raj Rana",
+    name: "Hem",
     gender: "Male",
     email: "hemraj@email.com",
     password: "12345678",
@@ -35,11 +35,11 @@ const usersSlice = createSlice({
   reducers: {
     setUsers: (state, action) => action.payload,
     editUser: (state, action) => {
-      const { id, newValue, field } = action.payload;
+      const { id } = action.payload;
 
       state[id] = {
         ...state[id],
-        [field]: newValue,
+        ...action.payload,
       };
     },
     createUser: (state, action) => ({

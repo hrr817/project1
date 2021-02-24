@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import {
   Header,
   Segment,
@@ -7,28 +8,25 @@ import {
   Divider,
   Message,
 } from "semantic-ui-react";
-import _ from "lodash";
-
-import { useHistory } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { selectUsers } from "../../features/users/usersSlice";
 import { logIn } from "../../features/currentUser/currentUserSlice";
 
-import { validateEmail } from "../../extras";
+import { validateEmail, validatePassword, validateUser } from "../../extras";
 const formDataInitialState = {
   email: "",
   password: "",
 };
 
 const errorInitialState = {
-  emailError: null,
-  passwordError: null,
+  email: null,
+  password: null,
 };
 
 const LoginForm = () => {
   const dispatch = useDispatch();
-  const usersData = useSelector(selectUsers);
+  const usersList = useSelector(selectUsers);
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
@@ -42,91 +40,65 @@ const LoginForm = () => {
   // Handle Errors
   useEffect(() => {
     const { email, password } = formData;
-
-    // Check if any form field is empty
     if (!email.length || !password.length) setIsAnyFormFieldEmpty(true);
     else setIsAnyFormFieldEmpty(false);
-
-    // Validate email
-    if (email !== "" && !validateEmail(email)) {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        emailError: {
-          pointing: "below",
-          content: "Please enter a valid email address.",
-        },
-      }));
-    } else {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        emailError: null,
-      }));
-    }
-
-    // Check password length
-    if (password !== "" && password.length < 8) {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        passwordError: {
-          pointing: "below",
-          content: "Password is too short, must be atleast 8 letters.",
-        },
-      }));
-    } else {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        passwordError: null,
-      }));
-    }
   }, [formData]);
 
-  const submitHandler = (e) => {
-    setLoading(true);
-    const email = e.target[0].value;
-    const password = e.target[1].value;
+  const validateForm = () => {
+    return new Promise((resolve, reject) => {
+      const { email, password } = formData;
 
-    const userInputData = {
-      email,
-      password,
-    };
+      // Validate email
+      const emailPromise = validateEmail(email);
+      const passwordPromise = validatePassword(password);
 
-    validateUser(userInputData)
-      .then((res) => {
-        setTimeout(() => {
-          setLoading(false);
-          dispatch(logIn(res));
-          history.push("/itemspage");
-        }, 1000);
-      })
-      .catch((err) => {
-        setTimeout(() => {
-          setLoading(false);
-          setLoginError(err);
-        }, 1000);
-      });
+      Promise.all([emailPromise, passwordPromise])
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   };
 
-  const validateUser = (data) => {
-    if (usersData) {
-      return new Promise((resolve, reject) => {
-        const { email, password } = data;
+  const submitHandler = async () => {
+    const { email, password } = formData;
 
-        _.forIn(usersData, (user, id) => {
-          if (user.email === email && user.password === password) {
-            resolve({
-              id,
-              ...user,
-            });
-            return;
-          }
-        });
+    try {
+      const res = await validateForm();
+      if (res) {
+        setLoading(true);
 
-        reject({
-          header: "No user found",
-          content:
-            "With the above combination of email and password, no user exists.",
-        });
-      });
+        const userInputData = {
+          email,
+          password,
+        };
+
+        validateUser(usersList, userInputData)
+          .then((res) => {
+            if (res.valid) {
+              setTimeout(() => {
+                setLoading(false);
+                dispatch(logIn(res));
+                history.push("/itemspage");
+              }, 1000);
+            }
+          })
+          .catch((err) => {
+            setTimeout(() => {
+              setLoading(false);
+              setLoginError(err);
+            }, 1000);
+          });
+      }
+    } catch (err) {
+      console.log(err);
+      const { field, content } = err;
+      setError((prevErros) => ({
+        ...prevErros,
+        [field]: content,
+      }));
     }
   };
 
@@ -146,29 +118,25 @@ const LoginForm = () => {
         loading={loading}
         error={loginError ? true : false}
       >
-        <Form.Field>
-          <Form.Input
-            label="Email"
-            name="email"
-            //   value={formData.email.content?.()}
-            placeholder="yourname@example.com"
-            onChange={(e) => handleFormData(e)}
-            error={error.emailError && error.emailError}
-            fluid
-          />
-        </Form.Field>
-        <Form.Field>
-          <Form.Input
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            placeholder="********"
-            onChange={(e) => handleFormData(e)}
-            error={error.passwordError && error.passwordError}
-            fluid
-          />
-        </Form.Field>
+        <Form.Input
+          label="Email"
+          name="email"
+          //   value={formData.email.content?.()}
+          placeholder="yourname@example.com"
+          onChange={(e) => handleFormData(e)}
+          error={error.email && error.email}
+          fluid
+        />
+        <Form.Input
+          label="Password"
+          type="password"
+          name="password"
+          value={formData.password}
+          placeholder="********"
+          onChange={(e) => handleFormData(e)}
+          error={error.password && error.password}
+          fluid
+        />
         {loginError && (
           <Message
             error

@@ -15,6 +15,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { createUser, selectUsers } from "../../features/users/usersSlice";
 import { logIn } from "../../features/currentUser/currentUserSlice";
+import { options } from "../../constants";
 // import { validateEmail } from "../../extras";
 
 const SignupForm = () => {
@@ -34,13 +35,6 @@ const SignupForm = () => {
     email: "",
     password: "",
   });
-
-  // for gender
-  const options = [
-    { key: "m", text: "Male", value: "Male" },
-    { key: "f", text: "Female", value: "Female" },
-    { key: "o", text: "Other", value: "Other" },
-  ];
 
   const handleCreation = (data) => {
     return new Promise((resolve, reject) => {
