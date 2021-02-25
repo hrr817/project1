@@ -20,35 +20,35 @@ const ItemsPage = () => {
   const currentUser = useSelector(selectCurrentUser);
   const history = useHistory();
 
-  const [activeTab, setActiveTab] = useState(tabs.otherTab);
+  const [activeTab, setActiveTab] = useState(tabs.usersTab);
 
   const handleLogout = () => {
     dispatch(logOut());
     history.push("/");
   };
 
-  // if (!currentUser) {
-  //   return (
-  //     <>
-  //       <br />
-  //       <br />
-  //       <Container fluid textAlign="center">
-  //         Please login to view contents.
-  //         <br />
-  //         <br />
-  //         <Link to="/">
-  //           <i aria-hidden="true" className="angle left icon"></i>
-  //           Go Back
-  //         </Link>
-  //       </Container>
-  //     </>
-  //   );
-  // }
+  if (!currentUser) {
+    return (
+      <>
+        <br />
+        <br />
+        <Container fluid textAlign="center">
+          Please login to view contents.
+          <br />
+          <br />
+          <Link to="/">
+            <i aria-hidden="true" className="angle left icon"></i>
+            Go Back
+          </Link>
+        </Container>
+      </>
+    );
+  }
 
   return (
     <>
       <Menu tabular>
-        {/* <Menu.Item>Welcome back, {currentUser.name}!</Menu.Item> */}
+        <Menu.Item>Welcome back, {currentUser.name}!</Menu.Item>
         <Menu.Item
           name="Users"
           active={activeTab === tabs.usersTab}
