@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OtherTab from "./component/Tabs/OtherTab";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCurrentUser,
+  updateCurrentUser,
   logOut,
 } from "./features/currentUser/currentUserSlice";
+import { selectUsers } from "./features/users/usersSlice";
 import { Container, Menu, Button } from "semantic-ui-react";
 
 import UsersTab from "./component/Tabs/UsersTab";
@@ -18,9 +20,31 @@ const tabs = {
 const ItemsPage = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
-  const history = useHistory();
+  const usersList = useSelector(selectUsers);
 
+  const history = useHistory();
   const [activeTab, setActiveTab] = useState(tabs.usersTab);
+
+  useEffect(() => {
+    if (currentUser) {
+      const { name, email, first_name, last_name, gender } = usersList[
+        currentUser.id
+      ];
+
+      dispatch(
+        updateCurrentUser({
+          id: currentUser.id,
+          name,
+          email,
+          first_name,
+          last_name,
+          gender,
+        })
+      );
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usersList, dispatch]);
 
   const handleLogout = () => {
     dispatch(logOut());

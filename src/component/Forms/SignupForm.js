@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import uuid from "react-uuid";
 import _ from "lodash";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -52,8 +53,12 @@ const SignupForm = () => {
       });
 
       if (!exist) {
-        dispatch(createUser(data));
-        resolve(true);
+        const id = uuid();
+        dispatch(createUser({ id, ...data }));
+        resolve({
+          id,
+          ...data,
+        });
       }
     });
   };
@@ -64,13 +69,12 @@ const SignupForm = () => {
       ...formData,
       name: formData.first_name + " " + formData.last_name,
     })
-      .then(() => {
+      .then((res) => {
         setTimeout(() => {
           setSignupComplete(true);
           setLoading(false);
-          // login user
-          const { email, gender, first_name, last_name } = formData;
-          dispatch(logIn({ email, gender, first_name, last_name }));
+          console.log(res);
+          dispatch(logIn(res));
           history.push("/itemspage");
         }, 1000);
       })

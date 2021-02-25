@@ -80,7 +80,10 @@ const LoginForm = () => {
             if (res.valid) {
               setTimeout(() => {
                 setLoading(false);
-                dispatch(logIn(res));
+                const { id, name, first_name, last_name, gender, email } = res;
+                dispatch(
+                  logIn({ id, name, first_name, last_name, gender, email })
+                );
                 history.push("/itemspage");
               }, 1000);
             }

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import uuid from "react-uuid";
 
 // List of users
 const initialState = {
@@ -44,7 +43,7 @@ const usersSlice = createSlice({
     },
     createUser: (state, action) => ({
       ...state,
-      [uuid()]: { ...action.payload },
+      [action.payload.id]: { ...action.payload },
     }),
     deleteUser: () => {
       //     delete user

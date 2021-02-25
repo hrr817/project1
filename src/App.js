@@ -1,26 +1,11 @@
-import { useEffect } from "react";
 import LoginForm from "./component/Forms/LoginForm";
 import { Link } from "react-router-dom";
 import { Container, Header } from "semantic-ui-react";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  selectCurrentUser,
-  updateCurrentUser,
-} from "./features/currentUser/currentUserSlice";
-import { selectUsers } from "./features/users/usersSlice";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "./features/currentUser/currentUserSlice";
 
 function App() {
-  const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
-  const usersList = useSelector(selectUsers);
-
-  useEffect(() => {
-    if (currentUser) {
-      dispatch(updateCurrentUser({ ...usersList[currentUser.id] }));
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersList, dispatch]);
 
   return (
     <Container>
